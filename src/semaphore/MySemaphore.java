@@ -40,7 +40,7 @@ public class MySemaphore {
 
         s++;
 
-        //使所有进程退出wait状态,竞争代码使用权然后执行
+        //使一个进程退出wait状态,竞争代码使用权然后执行
         notify();
 
     }

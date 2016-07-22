@@ -10,11 +10,13 @@ import java.util.concurrent.Executors;
  */
 public class ProducerAndConsumer {
 
-    //用于模拟的缓冲区
+    //用于模拟的缓冲区,这里模拟无限缓冲区
     public ArrayList<Integer> buffer=new ArrayList<>();
     public int currentSize=-1;
+    //用于控制每时刻只有一个实体的信号量
     public MySemaphore locksemaphore=new MySemaphore(1);
-    public MySemaphore usesemaphore=new MySemaphore(1);
+    //通知消费者的信号量
+    public MySemaphore usesemaphore=new MySemaphore(0);
 
     private void produce(){
 
@@ -22,11 +24,17 @@ public class ProducerAndConsumer {
         while(true) {
             locksemaphore.acquire();
             currentSize++;
-            buffer.add(new Integer((int) Math.random() * 100));
+            int num=(int)(Math.random() * 100);
+            buffer.add(num);
+            System.out.println("Producer:"+Thread.currentThread().getName()+"  produce ["+currentSize+"]="+num);
+
             locksemaphore.release();
             usesemaphore.release();
+
+
             try {
                 Thread.sleep(3000);
+
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -40,8 +48,9 @@ public class ProducerAndConsumer {
 
             usesemaphore.acquire();
             locksemaphore.acquire();
-            buffer.remove(currentSize);
+            buffer.remove(buffer.size()-1);
             currentSize--;
+            System.out.println("Consumer:"+Thread.currentThread().getName()+" consume in "+(currentSize+1));
             locksemaphore.release();
             try {
                 Thread.sleep(3000);
@@ -59,6 +68,7 @@ public class ProducerAndConsumer {
      */
     public void run(int pnum,int snum){
 
+        //获取线程池
         ExecutorService executorService= Executors.newCachedThreadPool();
 
         for(int i=0;i<pnum;i++){
@@ -96,7 +106,7 @@ public class ProducerAndConsumer {
 
         ProducerAndConsumer producerAndConsumer=new ProducerAndConsumer();
 
-        producerAndConsumer.run(4,4);
+        producerAndConsumer.run(4,5);
 
     }
 }

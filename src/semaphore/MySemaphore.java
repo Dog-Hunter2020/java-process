@@ -10,36 +10,38 @@ public class MySemaphore {
 
     public MySemaphore(int a){
 
-
-        if(a<0)return;
-
         this.s=a;
 
     }
 
-    public void  acquire(){
+    public synchronized int getS(){
+        return s;
+    }
+    //锁定代码块,使得acquire成为原子操作
+    public synchronized void  acquire(){
 
-        s--;
+
+
         if(s<=0)
             try {
 
+                //阻塞进程,直到被唤醒
                 wait();
 
             }catch (Exception e){
                 e.printStackTrace();
             }
 
-
+        s--;
     }
 
-    public void release(){
+    //锁定代码块,使得release成为原子操作,唤醒一个进程被wait的进程
+    public synchronized void release(){
 
         s++;
 
-        if(s>0)
-
-            notify();
-
+        //使所有进程退出wait状态,竞争代码使用权然后执行
+        notify();
 
     }
 }
